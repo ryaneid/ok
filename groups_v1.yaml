@@ -1,0 +1,452 @@
+openapi: 3.0.0
+servers:
+  - url: /applicationmgmt
+info:
+  title: Application Management API
+  description: These are the routes supported by Application Management.
+  version: 'v1'
+paths:
+  '/v1/groups':
+    get:
+      summary: Query for groups
+      description: Allows the retrieval of groups the user has access to
+      tags:
+        - Groups
+      parameters:
+        - $ref: '#/components/parameters/tenantIDHeaderParam'
+        - $ref: '#/components/parameters/authHeaderParam'
+        - $ref: '#/components/parameters/transactionIDHeaderParam'
+        - $ref: '#/components/parameters/offsetQueryParam'
+        - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/filterQueryParam'
+        - $ref: '#/components/parameters/fieldQueryParam'
+      responses:
+        '200':
+          description: A single page of groups
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllGroups'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500ServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    post:
+      summary: Create a new group
+      description: Allows the creation of policy based groups
+      tags:
+        - Groups
+      parameters:
+        - $ref: '#/components/parameters/tenantIDHeaderParam'
+        - $ref: '#/components/parameters/authHeaderParam'
+        - $ref: '#/components/parameters/transactionIDHeaderParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupPayload'
+        description: Payload for the group to be created
+        required: true
+      responses:
+        '201':
+          $ref: '#/components/responses/201Created'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '409':
+          $ref: '#/components/responses/409Conflict'
+        '500':
+          $ref: '#/components/responses/500ServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  '/v1/groups/member_counts/query':
+    post:
+      summary: Retrieve the number of members in multiple groups
+      description: >
+        Retrieves the amount of members in named groups. The counts returned are not
+        live and may temporarily be inaccurate when members are added or removed.
+      tags:
+        - Groups
+      parameters:
+        - $ref: '#/components/parameters/tenantIDHeaderParam'
+        - $ref: '#/components/parameters/authHeaderParam'
+        - $ref: '#/components/parameters/transactionIDHeaderParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NameList'
+      responses:
+        '200':
+          description: The group counts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupCountList'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500ServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  '/v1/groups/{name}':
+    get:
+      summary: Fetch a group
+      description: Allows the retrieval of individual groups the user has access to
+      tags:
+        - Groups
+      parameters:
+        - $ref: '#/components/parameters/tenantIDHeaderParam'
+        - $ref: '#/components/parameters/authHeaderParam'
+        - $ref: '#/components/parameters/transactionIDHeaderParam'
+        - $ref: '#/components/parameters/namePathParam'
+        - $ref: '#/components/parameters/fieldQueryParam'
+      responses:
+        '200':
+          description: The group
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500ServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    post:
+      summary: Update a group
+      description: Allows groups to be updated. Note that groups cannot be renamed.
+      tags:
+        - Groups
+      parameters:
+        - $ref: '#/components/parameters/tenantIDHeaderParam'
+        - $ref: '#/components/parameters/authHeaderParam'
+        - $ref: '#/components/parameters/transactionIDHeaderParam'
+        - $ref: '#/components/parameters/namePathParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupPayload'
+        description: Payload for the group to be created
+        required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/200Updated'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500ServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    delete:
+      summary: Delete a group
+      description: Allows the asynchronous removal of groups
+      tags:
+        - Groups
+      parameters:
+        - $ref: '#/components/parameters/tenantIDHeaderParam'
+        - $ref: '#/components/parameters/authHeaderParam'
+        - $ref: '#/components/parameters/transactionIDHeaderParam'
+        - $ref: '#/components/parameters/namePathParam'
+      responses:
+        '202':
+          $ref: '#/components/responses/202Accepted'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500ServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  '/v1/groups/{name}/member_counts':
+    get:
+      summary: Fetch the number of members in a group
+      description: >
+        Retrieves the amount of members in a group. For performance reasons, the
+        count may be inaccurate for a period of time after members are added or
+        removed.
+      tags:
+        - Groups
+      parameters:
+        - $ref: '#/components/parameters/tenantIDHeaderParam'
+        - $ref: '#/components/parameters/authHeaderParam'
+        - $ref: '#/components/parameters/transactionIDHeaderParam'
+        - $ref: '#/components/parameters/namePathParam'
+      responses:
+        '200':
+          description: The group count
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupCount'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500ServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  '/v1/groups/{name}/members':
+    get:
+      summary: Fetch the members of a group
+      description: >
+        Retrieves a page of members. Each result has a `nextOffset` field
+        defined. This must be provided as the `offset` query parameter to retrieve
+        the next page. When `nextOffset` is an empty string, there are no
+        additional pages that can be retrieved.
+      tags:
+        - Groups
+      parameters:
+        - $ref: '#/components/parameters/tenantIDHeaderParam'
+        - $ref: '#/components/parameters/authHeaderParam'
+        - $ref: '#/components/parameters/transactionIDHeaderParam'
+        - $ref: '#/components/parameters/namePathParam'
+        - $ref: '#/components/parameters/offsetQueryParam'
+        - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/fieldQueryParam'
+      responses:
+        '200':
+          description: A single page of resources.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllResources'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500ServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+components:
+  parameters:
+    authHeaderParam:
+      name: "Authorization"
+      in: header
+      description: A bearer token
+      required: true
+      schema:
+        type: string
+    filterQueryParam:
+      name: filter
+      in: query
+      description: Filters for the result set.
+      schema:
+        type: array
+        items:
+          type: string
+    fieldQueryParam:
+      name: field
+      in: query
+      description: Fields to return for each item.
+      schema:
+        type: array
+        items:
+          type: string
+    limitQueryParam:
+      name: limit
+      in: query
+      description: >
+        The size of the page to retrieve. Note that the actual amount
+        returned may be less than the limit, even when there are additional
+        pages.
+      schema:
+        type: integer
+    namePathParam:
+      name: name
+      in: path
+      description: The name of the object being referenced
+      required: true
+      schema:
+        type: string
+    offsetQueryParam:
+      name: offset
+      in: query
+      description: >
+        The offset of the page to retrieve. For the initial query, either
+        pass an empty string or do not pass this parameter at all.
+      schema:
+        type: string
+    tenantIDHeaderParam:
+      name: X-TenantID
+      in: header
+      description: |
+        The subscription ID.
+      required: true
+      schema:
+        type: string
+    transactionIDHeaderParam:
+      name: X-TransactionID
+      in: header
+      description: |
+        Optional TransactionID to be used to for logging purposes.
+      schema:
+        type: string
+  responses:
+    200Updated:
+      description: Existing object was updated.
+    201Created:
+      description: Object was created.
+    202Accepted:
+      description: Request was accepted.
+    400BadRequest:
+      description: Invalid request
+    404NotFound:
+      description: The object was not found
+    409Conflict:
+      description: An object with that identifier already exists.
+    500ServerError:
+      description: Internal server error
+    503ServiceUnavailable:
+      description: Required service unavailable
+  schemas:
+    AllGroups:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Group'
+        nextOffset:
+          type: string
+          description: >
+            This value should be passed in as the offset for the next query as
+            is. The value is not guaranteed to follow any set pattern and should
+            be captured as a string. When this value is empty, no further pages
+            are available.
+    AllResources:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Resource'
+        nextOffset:
+          type: string
+          description: >
+            This value should be passed in as the offset for the next query as
+            is. The value is not guaranteed to follow any set pattern and should
+            be captured as a string. When this value is empty, no further pages
+            are available.
+    Group:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The unique name of the group.
+        type:
+          type: string
+          description: Indicates how the group should be displayed.
+        description:
+          type: string
+          description: Provides information about the group.
+        policy:
+          $ref: '#/components/schemas/GroupPolicy'
+        policyVersion:
+          type: string
+          enum: [static]
+    GroupCount:
+      type: object
+      properties:
+        count:
+          type: string
+          description: The number of members in the group
+        retrievedAt:
+          type: string
+          description: A timestamp of when the count was last calculated (approximate).
+    GroupCountList:
+      type: object
+      description: A map from group name to count
+      properties:
+        counts:
+          type: object
+          additionalProperties:
+            type: integer
+        retrievedAt:
+          type: object
+          additionalProperties:
+            type: string
+    GroupPayload:
+      type: object
+      required:
+        - name
+        - policy
+        - policyVersion
+      properties:
+        name:
+          type: string
+          description: The unique name of the group.
+        type:
+          type: string
+          description: Indicates how the group should be displayed.
+        description:
+          type: string
+          description: Provides information about the group.
+        policy:
+          $ref: '#/components/schemas/GroupPolicy'
+        policyVersion:
+          type: string
+          enum: [static]
+    GroupPolicy:
+      type: array
+      description: |
+        Defines what resources will be placed in the group. The outer array is OR'ed together. The inner array is AND'ed
+        together. For example,
+
+        ```[[{"field": "A", "match": "xyz"}],[{"field": "A", "match": "wx"},{"field": "B", "match": "yz"}]]```
+
+        would become:
+
+        ```({"field": "A", "match": "xyz"}) OR ({"field": "A", "match": "wx"} AND {"field": "B", "match": "yz"})```
+
+        Note that static groups only allow conditions of the form ```{"field": "uid", "not": true, "equal": "some-uid"}```
+        to add new members or remove existing members. When queried, a static group will have an empty policy.
+      items:
+        type: array
+        items:
+          type: object
+          description: A simple condition.
+          required:
+            - field
+          properties:
+            field:
+              type: string
+              description: The field to check. Nesting is not supported.
+            not:
+              type: boolean
+              description: Negates the condition. Can be used to modify the result of any operator.
+            match:
+              type: string
+              description: Requires that the field is matched by the provided regex. Uses leftmost-first matching
+                and cannot be used in combination with other operators.
+            equal:
+              type: string
+              description: Requires that the field is equal. Cannot be used in combination with other operators.
+    NameList:
+      type: array
+      items:
+        type: string
+        description: A name
+    Resource:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Rest id for the subscription.
+        uid:
+          type: string
+          description: GUID for the subscription.
+        name:
+          type: string
+          description: Name of the subscription.
+        description:
+          type: string
+          description: Description of the subscription
